@@ -1,64 +1,35 @@
----
-title: AI Skin Specialist
-emoji: ✨
-colorFrom: green
-colorTo: pink
-sdk: gradio
-app_file: main.py
-pinned: false
----
-
 # AI Skin Specialist
 
-A Gradio application that combines a patient voice description, a skin image, and optional video into cautious AI-assisted skin-care guidance.
+An **AI-based Medical Skin Specialist** is a multimodal health-information and decision-support prototype that analyzes a user's skin image along with an optional text or voice query. It uses vision and language models to generate a **preliminary, non-diagnostic explanation** and can provide the response in both text and speech. 
 
-> **Clinical safety:** This app provides general information only. It is not a diagnostic tool or a replacement for a licensed clinician.
+## Features
 
-## Project structure
+* 🖼️ **Skin Image Analysis** – Analyzes uploaded images to identify visible skin features.
+* 💬 **Text & Voice Queries** – Allows users to ask questions using text or voice.
+* 🎙️ **Speech-to-Text** – Converts voice input into text.
+* 🤖 **AI-Based Analysis** – Combines image information with the user's query to generate a response.
+* 🔊 **Text-to-Speech** – Converts the generated response into audio.
+* ⚕️ **Safety Guidance** – Indicates when professional medical evaluation may be appropriate.
+* 🌐 **Web Interface** – Provides image upload, input, response display, and audio playback. 
 
-```text
-.
-├── app/
-│   ├── services.py       # Orchestrates transcription, analysis, and voice output
-│   ├── styles.py         # Central visual design system (CSS)
-│   └── ui.py             # Gradio interface and event wiring
-├── main.py               # Small application entry point
-├── Doctors_Brain.py      # Groq vision-language guidance
-├── Doctors_Voice.py      # Deepgram text-to-speech
-├── Patients_Voice.py     # Groq speech-to-text
-├── pyproject.toml        # Python dependencies
-├── requirements.txt      # Deployment-friendly dependency list
-└── .env.example          # Required environment variable names
-```
+## Technologies Used
 
-## Run locally
+* **Python**
+* **Gradio**
+* **Multimodal LLM / Vision Model**
+* **Speech-to-Text (STT)**
+* **Text-to-Speech (TTS)**
+* **Groq / Compatible AI API**
+* **ElevenLabs / Deepgram** 
 
-1. Install Python 3.11 or newer.
-2. Install dependencies: `pip install -e .`
-3. Copy `.env.example` to `.env`, then add your API keys.
-4. Run: `python main.py`
+## Project Objectives
 
-## Deployment
+The project aims to make basic skin-related health information more accessible by allowing users to upload a skin image, ask questions through text or voice, and receive clear AI-generated guidance. 
 
-Deploy this as a Python web app—not GitHub Pages—because it needs server-side API keys.
+## Disclaimer
 
-### Hugging Face Spaces (recommended)
+This project is a **health-information and decision-support prototype**. It does not provide a confirmed medical diagnosis, replace a dermatologist, prescribe medication, or guarantee accuracy. Users should seek professional medical advice when necessary. 
 
-1. Create a new **Gradio** Space.
-2. Select **Files → Add file → Upload files** and upload this project, or connect the repository.
-3. In **Settings → Repository secrets**, add `GROQ_API_KEY` and `DEEPGRAM_API_KEY`. Optional overrides are listed in `.env.example`.
-4. The Space automatically starts `main.py` from the metadata at the top of this README.
+## Future Scope
 
-Hugging Face gives you a public HTTPS URL usable from any device.
-
-### Render
-
-Create a Web Service from this GitHub repository and set:
-
-- Build command: `pip install -r requirements.txt`
-- Start command: `python main.py`
-- Secret environment variables: `GROQ_API_KEY` and `DEEPGRAM_API_KEY`
-
-The app reads Render's `PORT` automatically.
-
-Never commit `.env` or API keys.
+Future improvements may include a clinically reviewed knowledge base, structured symptom questions, image-quality checks, clinician referral workflows, multilingual voice interaction, and evaluation using properly sourced datasets. 
