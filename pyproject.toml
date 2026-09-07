@@ -1,15 +1,15 @@
 [project]
 name = "ai-skin-specialist"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.0"
+description = "AI-assisted, safety-conscious skin-care guidance with voice, image, and video inputs."
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.120.2",
     "deepgram-sdk>=7.8.1",
     "gradio>=6.26.0",
     "groq>=1.6.0",
+    "pillow>=10.0.0",
     "pydub>=0.25.1",
     "python-dotenv>=1.2.2",
-    "speechrecognition>=3.17.0",
+    "speechrecognition>=3.10.0",
 ]
