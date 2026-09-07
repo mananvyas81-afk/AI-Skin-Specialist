@@ -1,3 +1,13 @@
+---
+title: AI Skin Specialist
+emoji: ✨
+colorFrom: green
+colorTo: pink
+sdk: gradio
+app_file: main.py
+pinned: false
+---
+
 # AI Skin Specialist
 
 A Gradio application that combines a patient voice description, a skin image, and optional video into cautious AI-assisted skin-care guidance.
@@ -17,6 +27,7 @@ A Gradio application that combines a patient voice description, a skin image, an
 ├── Doctors_Voice.py      # Deepgram text-to-speech
 ├── Patients_Voice.py     # Groq speech-to-text
 ├── pyproject.toml        # Python dependencies
+├── requirements.txt      # Deployment-friendly dependency list
 └── .env.example          # Required environment variable names
 ```
 
@@ -34,14 +45,20 @@ Deploy this as a Python web app—not GitHub Pages—because it needs server-sid
 ### Hugging Face Spaces (recommended)
 
 1. Create a new **Gradio** Space.
-2. Upload this repository's code (do not upload `.env`).
-3. Add these Space Secrets: `GROQ_API_KEY`, `DEEPGRAM_API_KEY`, and optionally `GROQ_MODEL`, `WHISPER_MODEL`, `DEEPGRAM_TTS_MODEL`.
-4. Set the Space's entry point to `main.py` and add a `requirements.txt` if prompted.
+2. Select **Files → Add file → Upload files** and upload this project, or connect the repository.
+3. In **Settings → Repository secrets**, add `GROQ_API_KEY` and `DEEPGRAM_API_KEY`. Optional overrides are listed in `.env.example`.
+4. The Space automatically starts `main.py` from the metadata at the top of this README.
 
-Hugging Face gives you a public HTTPS address you can use from anywhere.
+Hugging Face gives you a public HTTPS URL usable from any device.
 
 ### Render
 
-Create a new Web Service from GitHub, add the same variables as secret environment variables, use `pip install -e .` as the build command, and `python main.py` as the start command. Change launch settings to bind to `0.0.0.0` and a platform-provided port before deploying.
+Create a Web Service from this GitHub repository and set:
+
+- Build command: `pip install -r requirements.txt`
+- Start command: `python main.py`
+- Secret environment variables: `GROQ_API_KEY` and `DEEPGRAM_API_KEY`
+
+The app reads Render's `PORT` automatically.
 
 Never commit `.env` or API keys.
