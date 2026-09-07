@@ -1,4 +1,7 @@
+import os
+
 import gradio as gr
+
 from app.styles import APP_CSS
 from app.ui import build_ui
 
@@ -7,6 +10,8 @@ if __name__ == "__main__":
     app = build_ui()
     app.launch(
         debug=False,
+        server_name="0.0.0.0",
+        server_port=int(os.environ.get("PORT", "7860")),
         theme=gr.themes.Soft(
             primary_hue="green",
             neutral_hue="slate",
