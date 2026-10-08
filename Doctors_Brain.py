@@ -121,9 +121,9 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
         response = client.chat.completions.create(
             model=os.environ.get(
                 "GROQ_MODEL",
-                "meta-llama/llama-4-scout-17b-16e-instruct"
+                "qwen/qwen3.8-27b"
             ),
-            max_completion_tokens=400,
+            max_completion_tokens=2000,
             response_format={"type": "json_object"},
             messages=[
                 {
