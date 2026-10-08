@@ -33,3 +33,19 @@ This project is a **health-information and decision-support prototype**. It does
 ## Future Scope
 
 Future improvements may include a clinically reviewed knowledge base, structured symptom questions, image-quality checks, clinician referral workflows, multilingual voice interaction, and evaluation using properly sourced datasets. 
+
+## Pipeline
+
+Image input -> Preprocessing (orientation fix, resize, contrast, quality check) -> Vision model (Llama-4 via Groq) -> Skin condition prediction -> Top-3 predictions with confidence.
+
+## Evaluation
+
+`python eval.py` runs the model on labelled images in `test_data/<condition>/` and reports accuracy, precision, recall, F1 and a confusion matrix (saved to `metrics.txt`).
+
+## Lightweight / Mobile Access
+
+The system uses a lightweight vision model through a cloud API, so it works from a phone browser with no on-device compute. Future work: fine-tune MobileNetV2 via transfer learning on a dermatology dataset (e.g., HAM10000) for offline use.
+
+## Limitations and Research Gaps
+
+Skin-tone bias, need for more diverse datasets, and lack of external clinical validation. Confidence values are the model's own estimates, not calibrated probabilities.

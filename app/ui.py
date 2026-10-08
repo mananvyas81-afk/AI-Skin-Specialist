@@ -33,18 +33,29 @@ def build_ui():
                         gr.HTML('<h2 class="result-heading">Your skin guidance</h2>')
                         transcript = gr.Textbox(label="What we heard", interactive=False, lines=3)
                         guidance = gr.Textbox(label="AI-assisted guidance", interactive=False, lines=7)
+                        preds = gr.Dataframe(headers=["Possible condition", "Confidence"], label="Prediction + confidence", interactive=False)
+                        with gr.Row():
+                            processed = gr.Image(label="After preprocessing", interactive=False, height=140)
+                            quality = gr.Textbox(label="Image quality check", interactive=False, lines=3)
                         spoken = gr.Audio(label="Spoken response", type="filepath", interactive=False)
+                        with gr.Accordion("Limitations and research gaps", open=False):
+                            gr.Markdown(
+                                "- **Skin-tone bias:** the underlying model may be trained on data with uneven skin-tone representation.\n"
+                                "- **Diverse datasets needed:** accuracy can drop on rare conditions and under-represented groups.\n"
+                                "- **External validation:** results have not been clinically validated on independent datasets.\n"
+                                "- Confidence is the model's own estimate, not a calibrated probability. Not a diagnosis."
+                            )
 
         gr.HTML('<p class="footer-note">AI Skin Specialist • Privacy-conscious, general skin-care guidance</p>')
 
         def submit(audio_path, image_path, video_path):
             try:
-                transcript_text, guidance_text, audio_response = analyze_consultation(audio_path, image_path, video_path)
+                transcript_text, guidance_text, audio_response, proc_img, quality_txt, pred_rows = analyze_consultation(audio_path, image_path, video_path)
             except ValueError as error:
                 raise gr.Error(str(error))
             except Exception:
                 raise gr.Error("We could not complete the analysis. Please check your connection and try again.")
-            return gr.update(visible=False), gr.update(visible=True), transcript_text, guidance_text, audio_response
+            return gr.update(visible=False), gr.update(visible=True), transcript_text, guidance_text, pred_rows, proc_img, quality_txt, audio_response
 
-        analyze.click(submit, [audio, image, video], [empty, results, transcript, guidance, spoken])
+        analyze.click(submit, [audio, image, video], [empty, results, transcript, guidance, preds, processed, quality, spoken])
     return demo

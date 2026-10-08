@@ -1,27 +1,51 @@
 import base64
+import json
 import os
+import re
 from io import BytesIO
 
 from dotenv import load_dotenv
 from groq import Groq
-from PIL import Image
+from PIL import Image, ImageOps, ImageStat
 
 
 load_dotenv()
 
 
-def encode_image_for_groq(filepath):
-    image = Image.open(filepath)
-    image.thumbnail((1024, 1024))
+def preprocess_image(filepath):
+    """Pipeline step 2: preprocessing. Returns (clean PIL image, quality notes)."""
+    image = ImageOps.exif_transpose(Image.open(filepath)).convert("RGB")
+    notes = []
+    if min(image.size) < 200:
+        notes.append("Low resolution - use a closer, higher-quality photo.")
+    brightness = ImageStat.Stat(image.convert("L")).mean[0]
+    if brightness < 60:
+        notes.append("Image is dark - retake in better light.")
+    elif brightness > 200:
+        notes.append("Image is overexposed - avoid direct flash.")
+    image.thumbnail((1024, 1024))            # resize
+    image = ImageOps.autocontrast(image, 1)  # normalise contrast
+    return image, (notes or ["Image quality is acceptable."])
 
+
+def encode_image_for_groq(image):
     buffer = BytesIO()
-    image.convert("RGB").save(
-        buffer,
-        format="JPEG",
-        quality=75
-    )
-
+    image.convert("RGB").save(buffer, format="JPEG", quality=75)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+
+def parse_prediction(text):
+    """Parse the model's JSON output; fall back to plain text if it is not valid."""
+    try:
+        data = json.loads(re.sub(r"^```(?:json)?|```$", "", text.strip()).strip())
+        preds = [
+            (str(p["condition"]), float(p["confidence"]))
+            for p in data.get("predictions", [])
+        ][:3]
+        preds.sort(key=lambda x: x[1], reverse=True)
+        return preds, str(data.get("guidance", "")).strip() or text
+    except Exception:
+        return [], text
 
 
 def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
@@ -39,7 +63,8 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
     # -----------------------------------------
     # Encode image
     # -----------------------------------------
-    image_data = encode_image_for_groq(image_filepath)
+    clean_image, quality_notes = preprocess_image(image_filepath)
+    image_data = encode_image_for_groq(clean_image)
 
     # -----------------------------------------
     # Keep patient text safely below API limit
@@ -59,10 +84,9 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
     prompt = (
         "Analyze the uploaded skin image as a careful skin care assistant. "
         "Give general information, not a diagnosis. "
-        "Mention visible skin concerns, possible general causes, and basic safe next steps. "
-        "Do not claim certainty. "
-        "Answer in 2 or 3 short sentences. "
-        "Use plain text only, with no markdown or symbols. "
+        "Reply ONLY with JSON: {\"predictions\": [{\"condition\": str, \"confidence\": number 0-100}, "
+        "...up to 3 most likely visible skin conditions], "
+        "\"guidance\": \"2 or 3 plain sentences: visible concerns, possible general causes, safe next steps\"}. "
         f"Patient description: {patient_text}"
     )
 
@@ -99,7 +123,8 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
                 "GROQ_MODEL",
                 "meta-llama/llama-4-scout-17b-16e-instruct"
             ),
-            max_completion_tokens=300,
+            max_completion_tokens=400,
+            response_format={"type": "json_object"},
             messages=[
                 {
                     "role": "system",
@@ -135,6 +160,12 @@ def brain_of_the_doctor(patient_text, image_filepath=None, video_filepath=None):
     # -----------------------------------------
     # Return doctor's response
     # -----------------------------------------
-    result = response.choices[0].message.content.strip()
+    raw = response.choices[0].message.content.strip()
+    predictions, guidance = parse_prediction(raw)
 
-    return result
+    return {
+        "guidance": guidance,
+        "predictions": predictions,       # [(condition, confidence %), ...]
+        "quality_notes": quality_notes,
+        "preprocessed_image": clean_image,
+    }
